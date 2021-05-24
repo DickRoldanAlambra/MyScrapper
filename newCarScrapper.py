@@ -6,11 +6,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 import csv
 import time
-import shutil # to save it locally
+from selenium.webdriver.chrome.options import Options
 import urllib.request
 
-
-from selenium.webdriver.chrome.options import Options
 op = webdriver.ChromeOptions()
 op.add_argument
 ("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
@@ -64,16 +62,23 @@ for k in range(1,132):
    url = 'https://www.iauc.co.jp/vehicle/carlist?page='+str(k)+'&sort_type=&limit=15&branch=&element=&mode=table&narrow_key=73802218660546bf7a7edc'
    driver.get(url)
    time.sleep(1)
-   WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//img[@class = 'img-car lazy-table']"))).click()
-   time.sleep(2)
-   # get the image source
-   img = driver.find_element_by_xpath('//figure[@class="col-md-12 col-xs-6"]/img')
-   src = img.get_attribute('src')
-   # download the image
-   headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36'}
-   session = request.Session()
-   req = session.get(src, headers=headers)
-   urllib.request.urlretrieve(src, "local-filename.jpg")
-   
-   
-       
+   trs =driver.find_elements_by_xpath('//table/tbody/tr/td[@class="col2 open-detail"]/img')
+   count = 1
+   for tr in trs:
+      print([tr.get_attribute('data-original')])        
+      src = tr.get_attribute('data-original')
+      
+      request = urllib.request.Request(src)
+      request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36')
+      request.add_header('Cookie', '_ga=GA1.3.359263082.1621670361; _gid=GA1.3.1725556770.1621670361; fuelrid=pr0AfA8cqH6cZr3zithRrxXMmoZegcFW-UV_t_-SBR-Voe1XWrWsucn8B-PSInQuD6Cabt1nbcwMMxfhx5LW9GRSSWQwLXhPNU1qdWJYWTc1WHF3UzRNcnVUOHVGb0poWWRyZEx5MkJwaFU; iauc_rf=0; __ulfpc=202105221559473211; mqzvpxGmSEwD=0; iauc_limit_vehicle=15; __ulfps=27pNsVyg1z83q946; iauc_lang=en; _l_tm_stmp=2021-05-22+19%3A10%3A28')
+
+      response = urllib.request.urlopen(request)
+      data = response.read()
+      with open("page"+str(k)+"_"+str(count)+"civic.jpg", "wb") as f:
+         f.write(data)
+      count +=1      
+      time.sleep(5)
+
+      
+          
+
